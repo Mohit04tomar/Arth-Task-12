@@ -1,0 +1,47 @@
+- hosts: Web_Server
+  tasks:
+  - name: "Installling Apache "
+    package:
+            name: httpd,php
+            state: present
+
+  - name: "Copying Web Pages"
+    template: 
+            src: "/Arth-task-12/index.php"
+            dest: "/var/www/html/index.php"
+    register: web
+  
+  - name: "Strating Web Server"
+    service:
+            name: httpd
+            state: started
+
+  - name: "Restarting Web Serer After Configuration"
+    service:
+            name: httpd
+            state: restarted
+    when: web.changed == True
+
+- hosts: Load_Balancer
+  tasks:
+  - name: "Installing and Configuring Load Balancer"
+    package:
+            name: haproxy
+            state: present
+   
+  - name: "Configuring HAPROXY"
+    template:
+            src: /Arth-task-12/haproxy.cfg
+            dest: /etc/haproxy/haproxy.cfg
+    register: x 
+
+  - name: "Starting Haproxy"
+    service:
+            name: haproxy
+            state: started
+
+  - name: "Started Haproxy with new configuration"
+    service:
+            name: haproxy
+            state: restarted
+    when: x.changed == True
